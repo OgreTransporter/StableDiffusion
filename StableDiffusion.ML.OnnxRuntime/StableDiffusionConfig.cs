@@ -29,6 +29,8 @@ namespace StableDiffusion.ML.OnnxRuntime
         // default directory for images
         public string ImageOutputPath = "";
 
+        public bool IsSafetyEnabled { get; set; }
+
         public SessionOptions GetSessionOptionsForEp()
         {
             var sessionOptions = new SessionOptions();

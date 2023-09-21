@@ -14,13 +14,13 @@ namespace StableDiffusion.ML.OnnxRuntime
         /// Initializes a new instance of the <see cref="TextProcessing"/> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        public TextProcessing(StableDiffusionConfig configuration)
+        public TextProcessing(StableDiffusionConfig configuration, PrePackedWeightsContainer prePackedWeightsContainer)
         {
             _configuration = configuration;
             _sessionOptions = _configuration.GetSessionOptionsForEp();
             _sessionOptions.RegisterOrtExtensions();
-            _encoderInferenceSession = new InferenceSession(_configuration.TextEncoderOnnxPath, _sessionOptions);
-            _tokenizerInferenceSession = new InferenceSession(_configuration.TokenizerOnnxPath, _sessionOptions);
+            _encoderInferenceSession = new InferenceSession(_configuration.TextEncoderOnnxPath, _sessionOptions, prePackedWeightsContainer);
+            _tokenizerInferenceSession = new InferenceSession(_configuration.TokenizerOnnxPath, _sessionOptions, prePackedWeightsContainer);
         }
 
 

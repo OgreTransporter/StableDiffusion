@@ -15,11 +15,11 @@ namespace StableDiffusion.ML.OnnxRuntime
         /// Initializes a new instance of the <see cref="VaeDecoder"/> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        public VaeDecoder(StableDiffusionConfig configuration)
+        public VaeDecoder(StableDiffusionConfig configuration, PrePackedWeightsContainer prePackedWeightsContainer)
         {
             _configuration = configuration;
             _sessionOptions = _configuration.GetSessionOptionsForEp();
-            _inferenceSession = new InferenceSession(_configuration.VaeDecoderOnnxPath, _sessionOptions);
+            _inferenceSession = new InferenceSession(_configuration.VaeDecoderOnnxPath, _sessionOptions, prePackedWeightsContainer);
         }
 
 

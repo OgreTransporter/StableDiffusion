@@ -16,11 +16,11 @@ namespace StableDiffusion.ML.OnnxRuntime
         /// Initializes a new instance of the <see cref="SafetyChecker"/> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        public SafetyChecker(StableDiffusionConfig configuration)
+        public SafetyChecker(StableDiffusionConfig configuration, PrePackedWeightsContainer prePackedWeightsContainer)
         {
             _configuration = configuration;
             _sessionOptions = _configuration.GetSessionOptionsForEp();
-            _inferenceSession = new InferenceSession(_configuration.SafetyModelPath, _sessionOptions);
+            _inferenceSession = new InferenceSession(_configuration.SafetyModelPath, _sessionOptions, prePackedWeightsContainer);
         }
 
 
@@ -32,7 +32,7 @@ namespace StableDiffusion.ML.OnnxRuntime
         /// <returns>
         ///   <c>true</c> if the specified result image is safe; otherwise, <c>false</c>.
         /// </returns>
-        public bool IsImageSafe(Tensor<float> resultImage, StableDiffusionConfig config)
+        public bool IsImageSafe(Tensor<float> resultImage)
         {
             //clip input
             var inputTensor = ClipImageFeatureExtractor(resultImage);
