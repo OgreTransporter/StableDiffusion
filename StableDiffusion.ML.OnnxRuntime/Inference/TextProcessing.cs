@@ -1,7 +1,8 @@
 ﻿using Microsoft.ML.OnnxRuntime.Tensors;
 using Microsoft.ML.OnnxRuntime;
+using StableDiffusion.ML.OnnxRuntime.Helpers;
 
-namespace StableDiffusion.ML.OnnxRuntime
+namespace StableDiffusion.ML.OnnxRuntime.Inference
 {
     public class TextProcessing : IDisposable
     {
@@ -59,7 +60,7 @@ namespace StableDiffusion.ML.OnnxRuntime
         public int[] TokenizeText(string text)
         {
             var inputTensor = new DenseTensor<string>(new string[] { text }, new int[] { 1 });
-            var inputString = new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor<string>("string_input", inputTensor) };
+            var inputString = new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor("string_input", inputTensor) };
 
             // Run session and send the input data in to get inference output. 
             using (var tokens = _tokenizerInferenceSession.Run(inputString))
@@ -92,7 +93,7 @@ namespace StableDiffusion.ML.OnnxRuntime
         {
             // Create input tensor.
             var input_ids = TensorHelper.CreateTensor(tokenizedInput, new[] { 1, tokenizedInput.Count() });
-            var input = new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor<int>("input_ids", input_ids) };
+            var input = new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor("input_ids", input_ids) };
 
             // Run inference.
             using (var encoded = _encoderInferenceSession.Run(input))
@@ -112,7 +113,7 @@ namespace StableDiffusion.ML.OnnxRuntime
         {
             var blankTokenValue = 49407;
             var modelMaxLength = 77;
-            var inputIds = new List<Int32>();
+            var inputIds = new List<int>();
             inputIds.Add(49406);
             var pad = Enumerable.Repeat(blankTokenValue, modelMaxLength - inputIds.Count()).ToArray();
             inputIds.AddRange(pad);

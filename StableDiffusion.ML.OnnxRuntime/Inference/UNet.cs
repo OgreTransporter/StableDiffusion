@@ -1,7 +1,9 @@
 ﻿using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
+using StableDiffusion.ML.OnnxRuntime.Helpers;
+using StableDiffusion.ML.OnnxRuntime.Scheduler;
 
-namespace StableDiffusion.ML.OnnxRuntime
+namespace StableDiffusion.ML.OnnxRuntime.Inference
 {
     public class UNet : IDisposable
     {
@@ -124,7 +126,7 @@ namespace StableDiffusion.ML.OnnxRuntime
 
             // Scale and decode the image latents with vae.
             // latents = 1 / 0.18215 * latents
-            latents = TensorHelper.MultipleTensorByFloat(latents, (1.0f / 0.18215f), latents.Dimensions);
+            latents = TensorHelper.MultipleTensorByFloat(latents, 1.0f / 0.18215f, latents.Dimensions);
             var decoderInput = new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor("latent_sample", latents) };
 
             // Decode image

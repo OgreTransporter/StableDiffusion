@@ -3,8 +3,9 @@ using Microsoft.ML.OnnxRuntime.Tensors;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using StableDiffusion.ML.OnnxRuntime.Helpers;
 
-namespace StableDiffusion.ML.OnnxRuntime
+namespace StableDiffusion.ML.OnnxRuntime.Inference
 {
     public class SafetyChecker : IDisposable
     {
@@ -96,9 +97,9 @@ namespace StableDiffusion.ML.OnnxRuntime
                 for (var x = 0; x < _configuration.Width; x++)
                 {
                     image[x, y] = new Rgba32(
-                        (byte)(Math.Round(Math.Clamp((imageTensor[0, 0, y, x] / 2 + 0.5), 0, 1) * 255)),
-                        (byte)(Math.Round(Math.Clamp((imageTensor[0, 1, y, x] / 2 + 0.5), 0, 1) * 255)),
-                        (byte)(Math.Round(Math.Clamp((imageTensor[0, 2, y, x] / 2 + 0.5), 0, 1) * 255))
+                        (byte)Math.Round(Math.Clamp(imageTensor[0, 0, y, x] / 2 + 0.5, 0, 1) * 255),
+                        (byte)Math.Round(Math.Clamp(imageTensor[0, 1, y, x] / 2 + 0.5, 0, 1) * 255),
+                        (byte)Math.Round(Math.Clamp(imageTensor[0, 2, y, x] / 2 + 0.5, 0, 1) * 255)
                     );
                 }
             }
@@ -123,9 +124,9 @@ namespace StableDiffusion.ML.OnnxRuntime
 
                 for (int x = 0; x < image.Width; x++)
                 {
-                    input[0, 0, y, x] = ((pixelSpan[x].R / 255f) - mean[0]) / stddev[0];
-                    input[0, 1, y, x] = ((pixelSpan[x].G / 255f) - mean[1]) / stddev[1];
-                    input[0, 2, y, x] = ((pixelSpan[x].B / 255f) - mean[2]) / stddev[2];
+                    input[0, 0, y, x] = (pixelSpan[x].R / 255f - mean[0]) / stddev[0];
+                    input[0, 1, y, x] = (pixelSpan[x].G / 255f - mean[1]) / stddev[1];
+                    input[0, 2, y, x] = (pixelSpan[x].B / 255f - mean[2]) / stddev[2];
                 }
             }
 

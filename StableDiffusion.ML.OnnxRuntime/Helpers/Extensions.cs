@@ -1,6 +1,6 @@
 ﻿using Microsoft.ML.OnnxRuntime;
 
-namespace StableDiffusion.ML.OnnxRuntime
+namespace StableDiffusion.ML.OnnxRuntime.Helpers
 {
     internal static class Extensions
     {

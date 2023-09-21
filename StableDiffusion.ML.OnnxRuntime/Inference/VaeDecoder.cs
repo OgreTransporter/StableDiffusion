@@ -2,8 +2,9 @@
 using Microsoft.ML.OnnxRuntime.Tensors;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using StableDiffusion.ML.OnnxRuntime.Helpers;
 
-namespace StableDiffusion.ML.OnnxRuntime
+namespace StableDiffusion.ML.OnnxRuntime.Inference
 {
     public class VaeDecoder : IDisposable
     {
@@ -55,9 +56,9 @@ namespace StableDiffusion.ML.OnnxRuntime
                 for (var x = 0; x < _configuration.Width; x++)
                 {
                     result[x, y] = new Rgba32(
-                        (byte)(Math.Round(Math.Clamp((output[0, 0, y, x] / 2 + 0.5), 0, 1) * 255)),
-                        (byte)(Math.Round(Math.Clamp((output[0, 1, y, x] / 2 + 0.5), 0, 1) * 255)),
-                        (byte)(Math.Round(Math.Clamp((output[0, 2, y, x] / 2 + 0.5), 0, 1) * 255))
+                        (byte)Math.Round(Math.Clamp(output[0, 0, y, x] / 2 + 0.5, 0, 1) * 255),
+                        (byte)Math.Round(Math.Clamp(output[0, 1, y, x] / 2 + 0.5, 0, 1) * 255),
+                        (byte)Math.Round(Math.Clamp(output[0, 2, y, x] / 2 + 0.5, 0, 1) * 255)
                     );
                 }
             }

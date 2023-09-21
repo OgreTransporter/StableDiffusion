@@ -44,8 +44,8 @@
 		<None Include="README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Compile Update="EulerAncestralDiscreteScheduler.cs">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  <Compile Update="Scheduler\EulerAncestralDiscreteScheduler.cs">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
 	  </Compile>
 	</ItemGroup>
 	<ItemGroup>
@@ -55,6 +55,7 @@
 	</ItemGroup>
 	<PropertyGroup>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PlatformTarget>x64</PlatformTarget>
 	</PropertyGroup>
 	<Target Name="CopyOnnxFile" AfterTargets="Build">
 		<Copy SourceFiles="cliptokenizer.onnx" DestinationFolder="$(OutputPath)" />

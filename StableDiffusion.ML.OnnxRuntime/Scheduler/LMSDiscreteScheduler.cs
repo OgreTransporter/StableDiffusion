@@ -1,8 +1,9 @@
 ﻿using Microsoft.ML.OnnxRuntime.Tensors;
 using MathNet.Numerics;
 using NumSharp;
+using StableDiffusion.ML.OnnxRuntime.Helpers;
 
-namespace StableDiffusion.ML.OnnxRuntime
+namespace StableDiffusion.ML.OnnxRuntime.Scheduler
 {
     public class LMSDiscreteScheduler : SchedulerBase
     {
@@ -58,7 +59,7 @@ namespace StableDiffusion.ML.OnnxRuntime
             Timesteps = timesteps.Select(x => (int)x).Reverse().ToList();
 
             var sigmas = _alphasCumulativeProducts.Select(alpha_prod => Math.Sqrt((1 - alpha_prod) / alpha_prod)).Reverse().ToList();
-            var range = np.arange((double)0, (double)(sigmas.Count)).ToArray<double>();
+            var range = np.arange(0, (double)sigmas.Count).ToArray<double>();
             sigmas = Interpolate(timesteps, range, sigmas).ToList();
             Sigmas = new DenseTensor<float>(sigmas.Count());
             for (int i = 0; i < sigmas.Count(); i++)

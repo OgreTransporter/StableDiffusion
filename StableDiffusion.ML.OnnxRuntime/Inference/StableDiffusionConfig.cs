@@ -1,10 +1,10 @@
 ﻿using Microsoft.ML.OnnxRuntime;
 
-namespace StableDiffusion.ML.OnnxRuntime
+namespace StableDiffusion.ML.OnnxRuntime.Inference
 {
     public class StableDiffusionConfig
     {
-        
+
         public enum ExecutionProvider
         {
             DirectML = 0,
@@ -36,12 +36,12 @@ namespace StableDiffusion.ML.OnnxRuntime
             var sessionOptions = new SessionOptions();
 
 
-            switch (this.ExecutionProviderTarget)
+            switch (ExecutionProviderTarget)
             {
                 case ExecutionProvider.DirectML:
                     sessionOptions.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
                     sessionOptions.EnableMemoryPattern = false;
-                    sessionOptions.AppendExecutionProvider_DML(this.DeviceId);
+                    sessionOptions.AppendExecutionProvider_DML(DeviceId);
                     sessionOptions.AppendExecutionProvider_CPU();
                     return sessionOptions;
                 case ExecutionProvider.Cpu:
@@ -51,7 +51,7 @@ namespace StableDiffusion.ML.OnnxRuntime
                 case ExecutionProvider.Cuda:
                     sessionOptions.GraphOptimizationLevel = GraphOptimizationLevel.ORT_ENABLE_ALL;
                     //default to CUDA, fall back on CPU if CUDA is not available.
-                    sessionOptions.AppendExecutionProvider_CUDA(this.DeviceId);
+                    sessionOptions.AppendExecutionProvider_CUDA(DeviceId);
                     sessionOptions.AppendExecutionProvider_CPU();
                     //sessionOptions = SessionOptions.MakeSessionOptionWithCudaProvider(cudaProviderOptions);
                     return sessionOptions;

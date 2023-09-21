@@ -1,7 +1,8 @@
 ﻿using Microsoft.ML.OnnxRuntime.Tensors;
 using NumSharp;
+using StableDiffusion.ML.OnnxRuntime.Helpers;
 
-namespace StableDiffusion.ML.OnnxRuntime
+namespace StableDiffusion.ML.OnnxRuntime.Scheduler
 {
     public class EulerAncestralDiscreteScheduler : SchedulerBase
     {
@@ -56,7 +57,7 @@ namespace StableDiffusion.ML.OnnxRuntime
             Timesteps = timesteps.Select(x => (int)x).Reverse().ToList();
 
             var sigmas = _alphasCumulativeProducts.Select(alpha_prod => Math.Sqrt((1 - alpha_prod) / alpha_prod)).Reverse().ToList();
-            var range = np.arange((double)0, (double)(sigmas.Count)).ToArray<double>();
+            var range = np.arange(0, (double)sigmas.Count).ToArray<double>();
             sigmas = Interpolate(timesteps, range, sigmas).ToList();
             InitNoiseSigma = (float)sigmas.Max();
             Sigmas = new DenseTensor<float>(sigmas.Count());
@@ -81,7 +82,7 @@ namespace StableDiffusion.ML.OnnxRuntime
             }
 
 
-            int stepIndex = Timesteps.IndexOf((int)timestep);
+            int stepIndex = Timesteps.IndexOf(timestep);
             var sigma = Sigmas[stepIndex];
 
             // 1. compute predicted original sample (x_0) from sigma-scaled predicted noise
@@ -109,11 +110,11 @@ namespace StableDiffusion.ML.OnnxRuntime
             float sigmaFrom = Sigmas[stepIndex];
             float sigmaTo = Sigmas[stepIndex + 1];
 
-            var sigmaFromLessSigmaTo = (MathF.Pow(sigmaFrom, 2) - MathF.Pow(sigmaTo, 2));
-            var sigmaUpResult = (MathF.Pow(sigmaTo, 2) * sigmaFromLessSigmaTo) / MathF.Pow(sigmaFrom, 2);
+            var sigmaFromLessSigmaTo = MathF.Pow(sigmaFrom, 2) - MathF.Pow(sigmaTo, 2);
+            var sigmaUpResult = MathF.Pow(sigmaTo, 2) * sigmaFromLessSigmaTo / MathF.Pow(sigmaFrom, 2);
             var sigmaUp = sigmaUpResult < 0 ? -MathF.Pow(MathF.Abs(sigmaUpResult), 0.5f) : MathF.Pow(sigmaUpResult, 0.5f);
 
-            var sigmaDownResult = (MathF.Pow(sigmaTo, 2) - MathF.Pow(sigmaUp, 2));
+            var sigmaDownResult = MathF.Pow(sigmaTo, 2) - MathF.Pow(sigmaUp, 2);
             var sigmaDown = sigmaDownResult < 0 ? -MathF.Pow(MathF.Abs(sigmaDownResult), 0.5f) : MathF.Pow(sigmaDownResult, 0.5f);
 
             // 2. Convert to an ODE derivative
