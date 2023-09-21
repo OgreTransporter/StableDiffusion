@@ -30,14 +30,16 @@ namespace StableDiffusion.ML.OnnxRuntime.Inference
         /// </summary>
         /// <param name="prompt">The prompt.</param>
         /// <returns></returns>
-        public DenseTensor<float> PreprocessText(string prompt)
+        public DenseTensor<float> PreprocessText(string prompt, string negativePrompt = null)
         {
             // Load the tokenizer and text encoder to tokenize and encode the text.
             var textTokenized = TokenizeText(prompt);
             var textPromptEmbeddings = TextEncoder(textTokenized).ToArray();
 
             // Create uncond_input of blank tokens
-            var uncondInputTokens = CreateUncondInput();
+            var uncondInputTokens = string.IsNullOrEmpty(negativePrompt)
+                ? CreateUncondInput()
+                : TokenizeText(negativePrompt);
             var uncondEmbedding = TextEncoder(uncondInputTokens).ToArray();
 
             // Concant textEmeddings and uncondEmbedding

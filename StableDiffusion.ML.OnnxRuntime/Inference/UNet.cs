@@ -79,10 +79,10 @@ namespace StableDiffusion.ML.OnnxRuntime.Inference
         }
 
 
-        public SixLabors.ImageSharp.Image Inference(string prompt)
+        public SixLabors.ImageSharp.Image Inference(string prompt, string negativePrompt = null)
         {
             // Preprocess text
-            var textEmbeddings = _textProcessing.PreprocessText(prompt);
+            var textEmbeddings = _textProcessing.PreprocessText(prompt, negativePrompt);
 
             var scheduler = new LMSDiscreteScheduler();
             //var scheduler = new EulerAncestralDiscreteScheduler();
