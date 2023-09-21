@@ -78,8 +78,8 @@ namespace StableDiffusion.ML.OnnxRuntime
             //var scheduler = new EulerAncestralDiscreteScheduler();
             var timesteps = scheduler.SetTimesteps(config.NumInferenceSteps);
             //  If you use the same seed, you will get the same image result.
-            var seed = new Random().Next();
-            //var seed = 329922609;
+           // var seed = new Random().Next();
+            var seed = 329922609;
             Console.WriteLine($"Seed generated: {seed}");
             // create latent tensor
 
@@ -126,16 +126,19 @@ namespace StableDiffusion.ML.OnnxRuntime
                 var decoderInput = new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor("latent_sample", latents) };
 
                 // Decode image
-                var imageResultTensor = VaeDecoder.Decoder(decoderInput, config);
-                var isNotSafe = SafetyChecker.IsNotSafe(imageResultTensor, config);
-
-                if (isNotSafe)
+                using (var vaeDecoder = new VaeDecoder(config))
                 {
-                    return null;
+                    var imageResultTensor = vaeDecoder.Decode(decoderInput);
+                    var isNotSafe = SafetyChecker.IsNotSafe(imageResultTensor, config);
 
+                    if (isNotSafe)
+                    {
+                        return null;
+
+                    }
+                    var image = vaeDecoder.ConvertToImage(imageResultTensor);
+                    return image;
                 }
-                var image = VaeDecoder.ConvertToImage(imageResultTensor, config);
-                return image;
             }
         }
 
