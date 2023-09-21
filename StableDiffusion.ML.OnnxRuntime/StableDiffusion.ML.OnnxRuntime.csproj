@@ -44,11 +44,6 @@
 		<None Include="README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Compile Update="Scheduler\EulerAncestralDiscreteScheduler.cs">
-	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	  </Compile>
-	</ItemGroup>
-	<ItemGroup>
 	  <None Update="cliptokenizer.onnx">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>

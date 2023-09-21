@@ -93,7 +93,7 @@ namespace StableDiffusion.ML.OnnxRuntime.Inference
             Console.WriteLine($"Seed generated: {seed}");
 
             // create latent tensor
-            var latents = GenerateLatentSample(_configuration, seed, scheduler.InitNoiseSigma);
+            var latents = GenerateLatentSample(_configuration, seed, scheduler.GetInitNoiseSigma());
             for (int t = 0; t < timesteps.Length; t++)
             {
                 // torch.cat([latents] * 2)
