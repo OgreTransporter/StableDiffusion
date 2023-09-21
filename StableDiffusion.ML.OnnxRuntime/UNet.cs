@@ -129,15 +129,14 @@ namespace StableDiffusion.ML.OnnxRuntime
 
                     // Decode image
                     using (var vaeDecoder = new VaeDecoder(config))
+                    using (var safetyChecker = new SafetyChecker(config))
                     {
                         var imageResultTensor = vaeDecoder.Decode(decoderInput);
-                        var isNotSafe = SafetyChecker.IsNotSafe(imageResultTensor, config);
+                        var isImageSafe = safetyChecker.IsImageSafe(imageResultTensor, config);
 
-                        if (isNotSafe)
-                        {
-                            return null;
+                        if (!isImageSafe)
+                            return null; // Image is NSFW
 
-                        }
                         var image = vaeDecoder.ConvertToImage(imageResultTensor);
                         return image;
                     }

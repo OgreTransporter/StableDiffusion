@@ -6,12 +6,37 @@ using SixLabors.ImageSharp.Processing;
 
 namespace StableDiffusion.ML.OnnxRuntime
 {
-    public static class SafetyChecker
+    public class SafetyChecker : IDisposable
     {
-        public static bool IsNotSafe(Tensor<float> resultImage, StableDiffusionConfig config)
+        private readonly SessionOptions _sessionOptions;
+        private readonly InferenceSession _inferenceSession;
+        private readonly StableDiffusionConfig _configuration;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SafetyChecker"/> class.
+        /// </summary>
+        /// <param name="configuration">The configuration.</param>
+        public SafetyChecker(StableDiffusionConfig configuration)
+        {
+            _configuration = configuration;
+            _sessionOptions = _configuration.GetSessionOptionsForEp();
+            _inferenceSession = new InferenceSession(_configuration.SafetyModelPath, _sessionOptions);
+        }
+
+
+        /// <summary>
+        /// Determines whether the specified result image is not NSFW.
+        /// </summary>
+        /// <param name="resultImage">The result image.</param>
+        /// <param name="config">The configuration.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified result image is safe; otherwise, <c>false</c>.
+        /// </returns>
+        public bool IsImageSafe(Tensor<float> resultImage, StableDiffusionConfig config)
         {
             //clip input
-            var inputTensor = ClipImageFeatureExtractor(resultImage, config);
+            var inputTensor = ClipImageFeatureExtractor(resultImage);
+
             //images input
             var inputImagesTensor = ReorderTensor(inputTensor);
 
@@ -25,16 +50,20 @@ namespace StableDiffusion.ML.OnnxRuntime
             };
 
             // Run session and send the input data in to get inference output. 
-            using (var sessionOptions = config.GetSessionOptionsForEp())
-            using (var session = new InferenceSession(config.SafetyModelPath, sessionOptions))
-            using (var output = session.Run(input))
+            using (var output = _inferenceSession.Run(input))
             {
                 var result = output.LastElementAs<IEnumerable<bool>>();
-                return result.First();
+                return !result.First();
             }
         }
 
-        private static DenseTensor<float> ReorderTensor(Tensor<float> inputTensor)
+
+        /// <summary>
+        /// Reorders the tensor.
+        /// </summary>
+        /// <param name="inputTensor">The input tensor.</param>
+        /// <returns></returns>
+        private DenseTensor<float> ReorderTensor(Tensor<float> inputTensor)
         {
             //reorder from batch channel height width to batch height width channel
             var inputImagesTensor = new DenseTensor<float>(new[] { 1, 224, 224, 3 });
@@ -50,17 +79,21 @@ namespace StableDiffusion.ML.OnnxRuntime
 
             return inputImagesTensor;
         }
-        private static DenseTensor<float> ClipImageFeatureExtractor(Tensor<float> imageTensor, StableDiffusionConfig config)
+
+
+        /// <summary>
+        /// Image feature extractor.
+        /// </summary>
+        /// <param name="imageTensor">The image tensor.</param>
+        /// <returns></returns>
+        private DenseTensor<float> ClipImageFeatureExtractor(Tensor<float> imageTensor)
         {
-            // Read image
-            //using Image<Rgb24> image = Image.Load<Rgb24>(imageFilePath);
-
             //convert tensor result to image
-            var image = new Image<Rgba32>(config.Width, config.Height);
+            var image = new Image<Rgba32>(_configuration.Width, _configuration.Height);
 
-            for (var y = 0; y < config.Height; y++)
+            for (var y = 0; y < _configuration.Height; y++)
             {
-                for (var x = 0; x < config.Width; x++)
+                for (var x = 0; x < _configuration.Width; x++)
                 {
                     image[x, y] = new Rgba32(
                         (byte)(Math.Round(Math.Clamp((imageTensor[0, 0, y, x] / 2 + 0.5), 0, 1) * 255)),
@@ -97,7 +130,16 @@ namespace StableDiffusion.ML.OnnxRuntime
             }
 
             return input;
+        }
 
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        public void Dispose()
+        {
+            _inferenceSession?.Dispose();
+            _sessionOptions?.Dispose();
         }
     }
 }
