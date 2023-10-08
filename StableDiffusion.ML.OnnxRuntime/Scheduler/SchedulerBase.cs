@@ -1,5 +1,4 @@
 ﻿using Microsoft.ML.OnnxRuntime.Tensors;
-using NumSharp;
 using StableDiffusion.ML.OnnxRuntime.Helpers;
 
 namespace StableDiffusion.ML.OnnxRuntime.Scheduler
@@ -29,13 +28,13 @@ namespace StableDiffusion.ML.OnnxRuntime.Scheduler
         {
             double start = 0;
             double stop = _configuration.TrainTimesteps - 1;
-            double[] timesteps = np.linspace(start, stop, inferenceSteps).ToArray<double>();
+            double[] timesteps = linspace(start, stop, inferenceSteps);
 
             _timesteps = timesteps.Select(x => (int)x)
                 .Reverse()
                 .ToList();
 
-            var range = np.arange(0, (double)_computedSigmas.Count).ToArray<double>();
+            var range = Enumerable.Range(0, _computedSigmas.Count).Select(x => (double)x).ToArray<double>();
             var sigmas = Interpolate(timesteps, range, _computedSigmas);
             _sigmasTensor = new DenseTensor<float>(sigmas.Length);
             for (int i = 0; i < sigmas.Length; i++)
@@ -80,12 +79,10 @@ namespace StableDiffusion.ML.OnnxRuntime.Scheduler
             {
                 var start = (float)Math.Sqrt(_configuration.BetaStart);
                 var end = (float)Math.Sqrt(_configuration.BetaEnd);
-                betas = np.linspace(start, end, _configuration.TrainTimesteps)
-                    .ToArray<float>()
-                    .Select(x => x * x)
+                betas = linspace(start, end, _configuration.TrainTimesteps)
+                    .Select(x => (float)(x * x))
                     .ToList();
             }
-
 
             alphas = betas.Select(beta => 1 - beta).ToList();
 
@@ -104,7 +101,7 @@ namespace StableDiffusion.ML.OnnxRuntime.Scheduler
         protected double[] Interpolate(double[] timesteps, double[] range, List<double> sigmas)
         {
             // Create an output array with the same shape as timesteps
-            var result = np.zeros(timesteps.Length + 1);
+            var result = new double[timesteps.Length + 1];
 
             // Loop over each element of timesteps
             for (int i = 0; i < timesteps.Length; i++)
@@ -127,7 +124,7 @@ namespace StableDiffusion.ML.OnnxRuntime.Scheduler
                 // If timesteps[i] is greater than the last element in range, use the last value in sigmas
                 else if (index == -range.Length - 1)
                 {
-                    result[i] = sigmas[sigmas.Count - 1];
+                    result[i] = sigmas.Last();
                 }
 
                 // Otherwise, interpolate linearly between two adjacent values in sigmas
@@ -139,10 +136,9 @@ namespace StableDiffusion.ML.OnnxRuntime.Scheduler
                 }
             }
 
-            //  add 0.000 to the end of the result
-            result = np.add(result, 0.000f);
-
-            return result.ToArray<double>();
+            return result;
         }
+
+        private double[] linspace(double start, double end, int partitions) => Enumerable.Range(0, partitions).Select(idx => idx != partitions ? start + (end - start) / (partitions - 1) * idx : end).ToArray();
     }
 }

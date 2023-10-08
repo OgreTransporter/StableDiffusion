@@ -1,5 +1,4 @@
 ﻿using Microsoft.ML.OnnxRuntime.Tensors;
-using NumSharp;
 using StableDiffusion.ML.OnnxRuntime.Helpers;
 
 namespace StableDiffusion.ML.OnnxRuntime.Scheduler
